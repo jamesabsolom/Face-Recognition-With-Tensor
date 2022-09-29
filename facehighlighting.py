@@ -59,8 +59,9 @@ def manipulate1():
         for (x, y, w, h) in faces:
             roi = img[y:y+h, x:x+w]
             # TODO :ADD NON BG REMOVED IMAGE TO FINAL DATASET HERE <3
-            roi = remove(roi)
-            cv2.imwrite((os.path.join(folderpathface, item)), roi)
+            removed = remove(roi)
+            cv2.imwrite((os.path.join(folderpathface,"Normal_" + item)), roi)
+            cv2.imwrite((os.path.join(folderpathface,"BGR_" + item)), removed)
             
 def manipulate2():
     print("Final Manipulation")
@@ -94,8 +95,8 @@ def manipulate2():
 
 
 # recordvideo()
-# manipulate1()
-manipulate2()
+manipulate1()
+# manipulate2()
 print("Done")
 
 
