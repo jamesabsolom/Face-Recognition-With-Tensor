@@ -13,19 +13,24 @@ ret, frame = capture.read()
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-print("Input name of subject")
-name = input()
+name = None
 
-folderpathcap = os.path.join("Test Images/Base", name)
-folderpathface = os.path.join("Test Images/Cropped", name)
-folderpathdone = os.path.join("Test Images/Done", name)
+def definename():
+    print("Input name of subject")
+    name = input()
 
-if not os.path.exists(folderpathcap):
-    os.mkdir(folderpathcap)
-if not os.path.exists(folderpathface):
-    os.mkdir(folderpathface)
-if not os.path.exists(folderpathdone):
-    os.mkdir(folderpathdone)
+    folderpathcap = os.path.join("Test Images/Base", name)
+    folderpathface = os.path.join("Test Images/Cropped", name)
+    folderpathdone = os.path.join("Test Images/Done", name)
+
+    if not os.path.exists(folderpathcap):
+        os.mkdir(folderpathcap)
+    if not os.path.exists(folderpathface):
+        os.mkdir(folderpathface)
+    if not os.path.exists(folderpathdone):
+        os.mkdir(folderpathdone)
+
+    return name
 
 
 def recordvideo():
@@ -93,11 +98,9 @@ def manipulate2():
         temp8 = cv2.addWeighted(img, 0.5, img, 0.5, 0)
         cv2.imwrite((folderpathdone + "/Sharp_" + item), temp8)
 
-
-
 #recordvideo()
 #manipulate1()
-manipulate2()
-print("Done")
+#manipulate2()
+#print("Done")
 
 

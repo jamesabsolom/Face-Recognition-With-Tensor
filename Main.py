@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow_datasets as tfds
 import cv2
 import os
+import DatasetCreation as DC
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml') # Loads the cascade
 
@@ -46,15 +47,15 @@ def loadingdataset():
     global ds_validate
     ds_validate = tf.keras.preprocessing.image_dataset_from_directory(
             'Test Images/Done',
-            labels ='inferred',          # Labels are inferred from the directory structure on the disk
-            label_mode = 'categorical',  # Encoding method of label; categorical = cat, dog |int = 0, 1, 2 |binary = true, false
-            color_mode = 'rgb',          # Colour of images, can be either grayscale or rgb
+            labels ='inferred',         # Labels are inferred from the directory structure on the disk
+            label_mode = 'categorical', # Encoding method of label; categorical = cat, dog |int = 0, 1, 2 |binary = true, false
+            color_mode = 'rgb',         # Colour of images, can be either grayscale or rgb
             batch_size = batch_size,    # Size of batches of data, default is 32
             image_size = (256, 256),    # Size of an image inside the dataset, will auto resize if not this size, 100% needed!!!!!
             shuffle = True,             # Will shuffle the dataset into a random order each epoch to get better results
             seed = 123,                 # Allows others to get the same result by putting in a similar seed
-            validation_split = 0.1,      # Tells you what percent of the data is going to be in the validation set, to test the model
-            subset = 'validation',       # Tells the dataset what type it is, validation or training
+            validation_split = 0.1,     # Tells you what percent of the data is going to be in the validation set, to test the model
+            subset = 'validation',      # Tells the dataset what type it is, validation or training
             )
 
 def trainmodel():
@@ -127,7 +128,8 @@ def menu():
     print("2 - save model                  ")
     print("3 - load model                  ")
     print("4 - test model                  ")
-    print("5 - quit                        ")
+    print("5 - add to dataset              ")
+    print("6 - quit                        ")
     print("--------------------------------")
     try:
         choice = int(input())
