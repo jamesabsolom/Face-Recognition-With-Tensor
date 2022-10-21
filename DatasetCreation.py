@@ -15,27 +15,52 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 
 name = None
 
+if not os.path.exists("Test Images"):
+    os.mkdir("Test Images")
+
+if not os.path.exists("Test Images/Manip1"):
+    os.mkdir("Test Images/Manip1")
+
+if not os.path.exists("Test Images/Manip2"):
+    os.mkdir("Test Images/Manip2")
+
+if not os.path.exists("Test Images/Done"):
+    os.mkdir("Test Images/Done")
+
 def definename():
     print("Input name of subject")
     name = input()
+    choice = ""
 
     folderpathcap = os.path.join("Test Images/Base", name)
-    folderpathface = os.path.join("Test Images/Cropped", name)
-    folderpathdone = os.path.join("Test Images/Done", name)
+    folderpathface = os.path.join("Test Images/Manip1", name)
+    folderpathdone = os.path.join("Test Images/Manip2", name)
+    folderpathfinalize = os.path.join("Test Images/Done", name)
 
-    if not os.path.exists(folderpathcap):
-        os.mkdir(folderpathcap)
-    if not os.path.exists(folderpathface):
-        os.mkdir(folderpathface)
-    if not os.path.exists(folderpathdone):
-        os.mkdir(folderpathdone)
+    while not os.path.exists(folderpathcap):
+        print(name + " does not exist in dataset, do you want to add it? y/n ")
+        try:
+            choice = input()
+        except:
+            print("Invalid input")
+        if choice == "y":
+            os.mkdir(folderpathcap)
+            if not os.path.exists(folderpathface):
+                os.mkdir(folderpathface)
+            if not os.path.exists(folderpathdone):
+                os.mkdir(folderpathdone)
+            if not os.path.exists(folderpathfinalize):
+                os.mkdir(folderpathfinalize)
 
-    return name
+        elif choice == "n":
+            break
+
+    return folderpathcap, folderpathface, folderpathdone, folderpathfinalize, name
 
 
-def recordvideo():
+def recordvideo(numofimg, folderpathcap):
     temp = 0
-    for x in tqdm(range(1000)):
+    for x in tqdm(range(numofimg)):
         temp=0
         while temp < 1:
             ret, frame = capture.read()
@@ -55,8 +80,9 @@ def recordvideo():
     cv2.destroyAllWindows()
     #manipulate1()
     
-def manipulate1():
+def manipulate1(folderpathcap, folderpathface, folderpathfinalize, name):
     print("Manipulating")
+    allFaces = []
     pics = os.listdir(folderpathcap)
     for item in tqdm(pics):
         img = cv2.imread(os.path.join(folderpathcap, item))
@@ -64,11 +90,23 @@ def manipulate1():
         faces = face_cascade.detectMultiScale(gray, 1.10, 10)
         for (x, y, w, h) in faces:
             roi = img[y:y+h, x:x+w]
-            # TODO :ADD NON BG REMOVED IMAGE TO FINAL DATASET HERE <3
             removed = remove(roi)
-            cv2.imwrite((os.path.join(folderpathface,"Normal_" + item)), roi)
-            cv2.imwrite((os.path.join(folderpathface,"BGR_" + item)), removed)
-            
+            allFaces.append(roi)
+            allFaces.append(removed)
+
+    temp = 0
+    for item in allFaces:
+        temp = temp+1
+        while temp == True:
+            cv2.imshow("K - Is Face, L - Not Face",item)
+            if cv2.waitKey(1) & 0xFF == ord('k'):
+                cv2.imwrite((os.path.join(folderpathface, str(temp) + name)), item)
+                temp = False
+            elif cv2.waitKey(1) & 0xFF == ord('l'):
+                temp = False
+
+    os.rename(folderpathcap, folderpathfinalize)
+
 def manipulate2():
     print("Final Manipulation")
     pics = os.listdir(folderpathface)

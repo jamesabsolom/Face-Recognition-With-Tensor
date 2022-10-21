@@ -8,11 +8,19 @@ import DatasetCreation as DC
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml') # Loads the cascade
 
+# Dataset manipulation variables ------------------------------------------------------------------------------------------------------------
+name = ""
+folderpathcap = ""
+folderpathface = ""
+folderpathdone = ""
+folderpathfinalize = ""
+
+# Model training variables ------------------------------------------------------------------------------------------------------------------
 ds_train = None
 ds_validate = None
 batch_size = 32
 class_names = []
-for folder in sorted(os.listdir("Test Images/Cropped")):
+for folder in sorted(os.listdir("Test Images/Manip2")):
     class_names.append(folder)
 
 
@@ -23,9 +31,9 @@ model.add(tf.keras.layers.Dense(128, activation=tf.nn.leaky_relu))  # Creates th
 model.add(tf.keras.layers.Dense(128, activation=tf.nn.leaky_relu)) # function of leaky relu which is the standard 
 model.add(tf.keras.layers.Dense(len(class_names), activation="sigmoid")) # Output with 10 possible values 0-9 with a softmax activation as its a probability distribution
 
+# Defines the paramaters for the training of the model --------------------------------------------------------------------------------------
 def compilemodel():
     global model
-    # Defines the paramaters for the training of the model -------------------------------------------------------------------------------
     model.compile(optimizer = 'adam',                       # How the training is optimised, adam is a good default but there are many others
               loss ='categorical_crossentropy',  # Degree of error allowed in the model
               metrics=['accuracy'])
@@ -33,7 +41,7 @@ def compilemodel():
 def loadingdataset():
     global ds_train 
     ds_train = tf.keras.preprocessing.image_dataset_from_directory(
-            'Test Images/Done',
+            'Test Images/Manip2',
             labels ='inferred',         # Labels are inferred from the directory structure on the disk
             label_mode = 'categorical', # Encoding method of label; categorical = cat, dog |int = 0, 1, 2 |binary = true, false
             color_mode = 'rgb',         # Colour of images, can be either grayscale or rgb
@@ -46,7 +54,7 @@ def loadingdataset():
             )
     global ds_validate
     ds_validate = tf.keras.preprocessing.image_dataset_from_directory(
-            'Test Images/Done',
+            'Test Images/Manip2',
             labels ='inferred',         # Labels are inferred from the directory structure on the disk
             label_mode = 'categorical', # Encoding method of label; categorical = cat, dog |int = 0, 1, 2 |binary = true, false
             color_mode = 'rgb',         # Colour of images, can be either grayscale or rgb
@@ -58,6 +66,7 @@ def loadingdataset():
             subset = 'validation',      # Tells the dataset what type it is, validation or training
             )
 
+# Trains the model --------------------------------------------------------------------------------------------------------------------------
 def trainmodel():
     global model
     print("How many epochs to run for?")
@@ -71,6 +80,7 @@ def trainmodel():
     print(val_loss, val_acc)
     menu()
 
+# Saving/Loading the model ------------------------------------------------------------------------------------------------------------------
 def savemodel():
     model.save('numreader.model') # Saves a model
     menu()
@@ -83,14 +93,12 @@ def loadmodel():
     #print('Restored model, accuracy: {:5.2f}%'.format(100 * acc))
     menu()
 
+# Running a video feed through the model ----------------------------------------------------------------------------------------------------
 def predict():
     capture = cv2.VideoCapture('/dev/v4l/by-id/usb-OmniVision_Technologies__Inc._USB_Camera-B4.09.24.1-video-index0')
     
     while True:
-        # test = cv2.imread('Test Images/Test.jpg')
         ret, test = capture.read()
-        # gray = cv2.cvtColor(test, cv2.COLOR_BGR2GRAY)    # Convert to grayscale
-        # gray = cv2.resize(gray, None, fx=0.95, fy=0.95)
         faces = face_cascade.detectMultiScale(test, 1.10, 10)
         for (x, y, w, h) in faces:       
             roi = test[y:y+h, x:x+w]
@@ -102,13 +110,6 @@ def predict():
             cv2.putText(test, str(class_names[y_pred.argmax()]), (x - 20, y - 20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         cv2.imshow("Test", test)
         cv2.createButton("Incorrect Prediction" ,incorrectprediction  ,None ,cv2.QT_PUSH_BUTTON, 1)
-
-    # Get prediction and visualize
-    # for i in range(10, 16):
-        # plt.subplot(280 + (i%10+1))
-        # plt.imshow(x_validate[i].reshape(28, 28), cmap=plt.cm.gray)
-        # plt.title(x_validate[i].argmax())
-    # plt.show()
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -122,15 +123,57 @@ def incorrectprediction():
     print("AHHHH")
     closewindow()
 
+# Menus -------------------------------------------------------------------------------------------------------------------------------------
+def datasetmenu():
+    global folderpathcap, folderpathface, folderpathdone, folderpathfinalize, name
+    print("--------------------------------")
+    if name != "":
+        try:
+            print("Selected Subject: " + name       )
+            print("Pictures to be manipulated: " + str(len(os.listdir(folderpathcap))))
+            print("Images to be 2nd manipulated: " + str(len(os.listdir(folderpathface))))
+            print("Number of 2nd level manipulated  images: " + str(len(os.listdir(folderpathdone))))
+        except:
+            print("Invalid File String")
+    print("-------------------------------------")
+    print("1 - Change Subject                   ")
+    if name != "":
+        try:
+            if os.path.exists(folderpathcap):
+                print("2 - Add Images to Dataset with video ")
+                print("3 - Run First Level Manipulation     ")
+                print("4 - Run Second Level Manipulation    ")
+        except:
+            pass
+    print("5 - Back                             ")
+    print("-------------------------------------")
+    try:
+        choice = int(input())
+    except:
+        datasetmenu()
+    if choice == 1:
+        folderpathcap, folderpathface, folderpathdone, folderpathfinalize, name = DC.definename()
+        datasetmenu()
+    elif choice == 2:
+        print("How Many Images Would You Like To Add?")
+        num = int(input())
+        recordvideo(num, folderpathcap)
+    elif choice == 3:
+        DC.manipulate1(folderpathcap, folderpathface, folderpathfinalize, name)
+    elif choice == 4:
+        menu()
+    else:
+        datasetmenu()
+
 def menu():
-    print("--------------------------------")
-    print("1 - train model                 ")
-    print("2 - save model                  ")
-    print("3 - load model                  ")
-    print("4 - test model                  ")
-    print("5 - add to dataset              ")
-    print("6 - quit                        ")
-    print("--------------------------------")
+    print("-------------------------------------")
+    print("1 - Train Model                      ")
+    print("2 - Save Model                       ")
+    print("3 - Load Model                       ")
+    print("4 - Test Model                       ")
+    print("5 - Dataset Menu                     ")
+    print("6 - quit                             ")
+    print("-------------------------------------")
     try:
         choice = int(input())
     except:
@@ -144,6 +187,8 @@ def menu():
     elif choice == 4:
         predict()
     elif choice == 5:
+        datasetmenu()
+    elif choice == 6:
         quit()
     else:
         print("Invalid input")
