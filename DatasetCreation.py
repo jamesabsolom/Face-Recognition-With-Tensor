@@ -97,17 +97,18 @@ def manipulate1(folderpathcap, folderpathface, folderpathfinalize, name):
     temp = 0
     for item in allFaces:
         temp = temp+1
-        while temp == True:
+        while True:
             cv2.imshow("K - Is Face, L - Not Face",item)
             if cv2.waitKey(1) & 0xFF == ord('k'):
-                cv2.imwrite((os.path.join(folderpathface, str(temp) + name)), item)
-                temp = False
+                cv2.imwrite((os.path.join(folderpathface, str(temp) + name + ".jpg")), item)
+                break
             elif cv2.waitKey(1) & 0xFF == ord('l'):
-                temp = False
+                break
 
     os.rename(folderpathcap, folderpathfinalize)
+    os.mkdir(folderpathcap)
 
-def manipulate2():
+def manipulate2(folderpathface, folderpathdone):
     print("Final Manipulation")
     pics = os.listdir(folderpathface)
     for item in tqdm(pics):
@@ -135,6 +136,8 @@ def manipulate2():
 
         temp8 = cv2.addWeighted(img, 0.5, img, 0.5, 0)
         cv2.imwrite((folderpathdone + "/Sharp_" + item), temp8)
+
+        os.remove(os.path.join(folderpathface, item))
 
 #recordvideo()
 #manipulate1()

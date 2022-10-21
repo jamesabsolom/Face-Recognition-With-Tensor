@@ -158,9 +158,15 @@ def datasetmenu():
         print("How Many Images Would You Like To Add?")
         num = int(input())
         recordvideo(num, folderpathcap)
+        datasetmenu()
     elif choice == 3:
         DC.manipulate1(folderpathcap, folderpathface, folderpathfinalize, name)
+        cv2. destroyAllWindows()
+        datasetmenu()
     elif choice == 4:
+        DC.manipulate2(folderpathface, folderpathdone)
+        datasetmenu()
+    elif choice == 5:
         menu()
     else:
         datasetmenu()
