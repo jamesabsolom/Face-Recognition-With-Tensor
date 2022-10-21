@@ -5,7 +5,6 @@ import tensorflow_datasets as tfds
 import cv2
 import os
 import DatasetCreation as DC
-
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml') # Loads the cascade
 
 # Dataset manipulation variables ------------------------------------------------------------------------------------------------------------
