@@ -93,7 +93,9 @@ def manipulate1(folderpathcap, folderpathface, folderpathfinalize, name):
             removed = remove(roi)
             allFaces.append(roi)
             allFaces.append(removed)
+    yesnoui(allFaces, folderpathface)
 
+def yesnoui(allFaces, folderpathface)
     temp = 0
     for item in allFaces:
         temp = temp+1
